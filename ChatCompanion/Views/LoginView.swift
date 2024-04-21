@@ -13,6 +13,7 @@ struct LoginView: View {
     @ObservedObject var viewModel: LoginViewModel
     @State private var isLoading = false
     @State private var showAlert = false
+    @State private var showRegister = false
     
     var body: some View {
         VStack {
@@ -40,32 +41,35 @@ struct LoginView: View {
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .background(Color.blue)
+                        .background(viewModel.isFormValid ? Color.blue : .gray.opacity(0.6))
                         .cornerRadius(10)
                 }
                 .disabled(!viewModel.isFormValid)
                 .padding()
             }
-            .padding()
+            
+            Button("Create user") {
+                showRegister.toggle()
+            }
             
         }
         .padding()
         .alert(isPresented: $showAlert) {
             Alert(title: Text("Login Error"), message: Text(viewModel.loginError ?? "Unknown error"), dismissButton: .default(Text("OK")))
         }
-        .onChange(of: viewModel.isAuthenticated) { newValue in
-        .analyticsScreen(name: "\(LoginView.self)")
+//        .analyticsScreen(name: "\(LoginView.self)")
         
         .onChange(of: viewModel.isAuthenticated, { oldValue, newValue in
             userViewModel.isAuthenticated = newValue
             isLoading = false
-        }
-        .onChange(of: viewModel.loginError) { _ in
+        })
+        .onChange(of: viewModel.loginError) { _, _ in
             isLoading = false
             showAlert = viewModel.loginError != nil
         }
+        .sheet(isPresented: $showRegister, content: {
+            RegistrationView(viewModel: RegistrationViewModel(apiClient: FirebaseAPIClient()))
         })
-    
         
     }
 }

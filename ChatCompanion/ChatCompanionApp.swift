@@ -34,7 +34,7 @@ struct ChatCompanionApp: App {
                 if viewModel.isAuthenticated, let currentUser = viewModel.currentUser {
                     ChatView(viewModel: ChatViewModel(currentUser: currentUser))
                 } else {
-                    LoginView(viewModel: LoginViewModel())
+                    LoginView(viewModel: LoginViewModel(apiClient: FirebaseAPIClient()))
                         .environmentObject(viewModel)
                 }
             }

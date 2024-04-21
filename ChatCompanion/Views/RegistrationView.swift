@@ -40,7 +40,7 @@ struct RegistrationView: View {
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .background(isLoading ? Color.gray : Color.blue)
+                        .background(!isFormValid() ? Color.gray : Color.blue)
                         .cornerRadius(8)
                 }
                 .disabled(!isFormValid() || isLoading)
@@ -52,6 +52,7 @@ struct RegistrationView: View {
             .onChange(of: viewModel.isRegistered) { isRegistered in
                 if isRegistered {
                     // Handle successful registration, e.g., navigate away or clear form
+                    
                 }
                 isLoading = false
             }

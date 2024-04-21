@@ -7,6 +7,62 @@
 
 import Foundation
 import Combine
+import FirebaseAuth
+import FirebaseFirestore
+
+class FirebaseAPIClient: APIClient {
+    
+    
+    override func register(username: String, email: String, password: String, completion: @escaping (Result<GenericAPIResponse, any Error>) -> Void) {
+        
+            Auth.auth().createUser(withEmail: email, password: password) { result, error in
+                if let error = error {
+                    completion(.failure(error))
+                    return
+                } else {
+                    
+                    // Create a reference to the user's document in Firestore
+                    
+                    let db = Firestore.firestore()
+                    let userRef = db.collection("users").document(result!.user.uid)
+                    
+                    // Prepare user data dictionary with username
+                    let userData = ["username": username, "email": email]
+                    
+                    userRef.setData(userData) { error in
+                        if let error = error {
+                            completion(.failure(error))
+                            return
+                        } else {
+                            print(result)
+                            completion(.success(.init(success: true, message: result?.description)))
+                        }
+                        // Handle successful signup
+                    }
+                    
+                    
+                }
+                // Handle successful signup
+            }
+        
+         
+    }
+    
+    override func login(username: String, password: String, completion: @escaping (Result<GenericAPIResponse, any Error>) -> Void) {
+        Auth.auth().signIn(withEmail: username, password: password) { result, error in
+            if let error = error {
+                completion(.failure(error))
+                return
+            } else {
+                print(result?.additionalUserInfo, result?.credential, result?.user)
+                completion(.success(.init(success: true, message: result?.description)))
+            }
+            // Handle successful signup
+        }
+    }
+    
+    
+}
 
 class LoginViewModel: ObservableObject {
     @Published var username: String = ""
