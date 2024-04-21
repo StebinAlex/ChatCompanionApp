@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import FirebaseAnalytics
 
 struct LoginView: View {
     @EnvironmentObject var userViewModel: UserViewModel
@@ -45,12 +46,17 @@ struct LoginView: View {
                 .disabled(!viewModel.isFormValid)
                 .padding()
             }
+            .padding()
+            
         }
         .padding()
         .alert(isPresented: $showAlert) {
             Alert(title: Text("Login Error"), message: Text(viewModel.loginError ?? "Unknown error"), dismissButton: .default(Text("OK")))
         }
         .onChange(of: viewModel.isAuthenticated) { newValue in
+        .analyticsScreen(name: "\(LoginView.self)")
+        
+        .onChange(of: viewModel.isAuthenticated, { oldValue, newValue in
             userViewModel.isAuthenticated = newValue
             isLoading = false
         }
@@ -58,6 +64,9 @@ struct LoginView: View {
             isLoading = false
             showAlert = viewModel.loginError != nil
         }
+        })
+    
+        
     }
 }
 
