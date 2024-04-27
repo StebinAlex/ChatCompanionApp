@@ -58,6 +58,8 @@ struct RegistrationView: View {
                                     viewModel.username = userName
                                     viewModel.email = email
                                     viewModel.password = "apple-signup"
+                                    isLoading = true
+                                    viewModel.register()
                                 } else {
                                     print("User name or email not available")
                                 }
