@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import AuthenticationServices
 
 struct RegistrationView: View {
     @ObservedObject var viewModel: RegistrationViewModel
@@ -32,18 +33,43 @@ struct RegistrationView: View {
                     SecureField("Confirm Password", text: $viewModel.passwordConfirmation)
                 }
 
-                Button(action: {
-                    isLoading = true
-                    viewModel.register()
-                }) {
-                    Text(isLoading ? "Registering..." : "Register")
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(isLoading ? Color.gray : Color.blue)
-                        .cornerRadius(8)
+                VStack {
+                    Button(action: {
+                        isLoading = true
+                        viewModel.register()
+                    }) {
+                        Text(isLoading ? "Registering..." : "Register")
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(!isFormValid() ? Color.gray : Color.blue)
+                            .cornerRadius(8)
+                    }
+                    .disabled(!isFormValid() || isLoading)
+                    
+                    SignInWithAppleButton(.signUp) { request in
+                        // Handle sign-in request here
+                    } onCompletion: { result in
+                        switch result {
+                        case .success(let authorization):
+                            // Extract user information (name, email, etc.)
+                            if let credential = authorization.credential as? ASAuthorizationAppleIDCredential {
+                                if let userName = credential.fullName?.givenName, let email = credential.email {
+                                    viewModel.username = userName
+                                    viewModel.email = email
+                                    viewModel.password = "apple-signup"
+                                } else {
+                                    print("User name or email not available")
+                                }
+                            } else {
+                                print("credentials not available")
+                            }
+                        case .failure(let error):
+                            print(error.localizedDescription)
+                        }
+                    }
                 }
-                .disabled(!isFormValid() || isLoading)
+                .padding(.vertical)
             }
             .navigationBarTitle("Register", displayMode: .inline)
             .alert(isPresented: $showAlert) {
